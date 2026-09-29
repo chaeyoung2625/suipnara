@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#222222">
+<title>수입나라 가격 찾기</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f1f3f6;color:#222;font-family:Arial,"Noto Sans KR",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.app{max-width:780px;margin:auto;padding:10px 10px 55px}
+.top{background:#fff;border-radius:17px;padding:17px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.title{font-size:23px;font-weight:900;margin:0}.desc{font-size:12px;color:#777;margin-top:5px}
+.connection{margin-top:8px;font-size:12px;color:#2b7a44;font-weight:800}.connection.bad{color:#b14a4a}
+.tabs{position:sticky;top:0;z-index:100;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f1f3f6;padding:5px 0;margin:0 0 10px}
+.tab{min-height:48px;padding:11px;border:1px solid #ddd;border-radius:12px;background:#fff;font-weight:900}.tab.active{background:#222;color:#fff;border-color:#222}
+.panel{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.search{display:flex;gap:6px}.search input{flex:1}input,select{width:100%;min-height:48px;padding:12px;border:1px solid #ddd;border-radius:10px;background:#fff;outline:none;font-size:16px}
+.search button,.primary{background:#222;color:#fff;border:0;border-radius:10px;padding:0 16px;font-weight:900}
+.section-label{font-size:13px;font-weight:900;margin:14px 0 7px}.muted{font-size:11px;color:#999;font-weight:400}
+.scroll{display:flex;gap:7px;overflow:auto;padding-bottom:2px}.pill{white-space:nowrap;min-height:42px;padding:8px 13px;border:1px solid #ddd;border-radius:999px;background:#fff}.pill.active{background:#222;color:#fff;border-color:#222}
+.color-filter{display:flex;gap:8px;overflow:auto;padding:4px 0}.color-btn{min-width:64px;min-height:66px;padding:7px 8px;background:#fff;border:1px solid #ddd;border-radius:11px;font-size:12px;text-align:center}.dot{width:27px;height:27px;border-radius:50%;margin:0 auto 4px;border:2px solid #ccc}.color-btn.active{border:2px solid #222;box-shadow:0 0 0 1px #222 inset}
+.filter-summary{font-size:12px;color:#777;margin-top:8px}
+.grid{display:grid;grid-template-columns:1fr;gap:9px}.card{background:#fff;border-radius:16px;padding:13px;box-shadow:0 3px 12px rgba(0,0,0,.05);position:relative;min-height:136px;cursor:pointer;touch-action:manipulation}.card:active{transform:scale(.995)}
+.product-body{padding-right:125px;min-height:108px;display:flex;flex-direction:column;justify-content:center}.photo{position:absolute;right:12px;top:12px;width:103px;height:100px;object-fit:cover;border-radius:12px;background:#eee}.icon{position:absolute;right:12px;top:12px;width:103px;height:100px;border-radius:12px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:34px}
+.meta{font-size:12px;color:#888;line-height:1.35}.name{font-weight:900;margin-top:3px;font-size:17px;line-height:1.25}.price{font-size:22px;font-weight:900;margin-top:9px}.empty{grid-column:1/-1;text-align:center;background:#fff;border-radius:16px;padding:35px;color:#888}
+.admin-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.action{min-height:52px;padding:12px;border:1px solid #ddd;border-radius:11px;background:#fff;font-weight:900}
+.form-title{font-size:18px;font-weight:900;margin-bottom:13px}.row{margin-bottom:11px}.row label{display:block;font-size:12px;color:#666;margin-bottom:5px}
+.edit-top{position:relative;min-height:0}.edit-photo-wrap{width:100%;margin-bottom:13px;text-align:center}.edit-photo{width:100%;height:180px;object-fit:cover;border-radius:14px;background:#eee;border:1px solid #ddd}.edit-photo-placeholder{width:100%;height:180px;border-radius:14px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px;text-align:center;border:1px dashed #ccc}
+.photo-input-label{display:block;margin-top:7px;padding:11px;text-align:center;border:1px solid #ddd;border-radius:9px;background:#fff;font-size:13px;font-weight:800}.edit-photo-wrap input[type=file]{display:none}
+.color-pick{display:flex;gap:10px;flex-wrap:wrap}.swatch{width:50px;height:50px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #bbb;position:relative}.swatch.selected{box-shadow:0 0 0 3px #222}.swatch.selected:after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900}
+.selected-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.tag{padding:6px 10px;background:#f0f1f4;border-radius:999px;font-size:12px}
+.form-buttons{display:flex;gap:7px;margin-top:12px}.form-buttons button{min-height:48px;padding:10px 14px;border-radius:10px;border:0;font-weight:900;background:#eee}.form-buttons .primary{background:#222;color:#fff}
+.edit-list{display:flex;flex-direction:column;gap:8px}.edit-item{background:#fff;border-radius:14px;padding:11px;display:flex;align-items:center;gap:9px;box-shadow:0 2px 10px rgba(0,0,0,.04);cursor:pointer;touch-action:manipulation}
+.thumb{width:50px;height:50px;border-radius:10px;object-fit:cover;background:#eee}.info{flex:1;min-width:0}.info b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.small{font-size:11px;color:#888;margin-top:3px}
+.edit-item button{padding:8px 9px;border-radius:9px;border:1px solid #ddd;background:#fff}.danger{color:#b33}
+.category-manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.category-box{border:1px solid #e3e3e3;border-radius:14px;padding:12px;background:#fafafa}.category-list{display:flex;flex-direction:column;gap:6px;max-height:250px;overflow:auto}.category-row{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:8px 9px}.category-row.selected{border:2px solid #222;padding:7px 8px}.category-row span{flex:1;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.category-mini-actions{display:flex;gap:5px}.category-mini-actions button{padding:6px 7px;border:1px solid #ddd;background:#fff;border-radius:8px;font-size:11px}
+.color-manage-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:9px}.color-manage-dot{width:38px;height:38px;border-radius:50%;border:1px solid #ccc;flex:none}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px}.modal-backdrop.hidden{display:none!important}.modal-box{width:min(330px,100%);background:#fff;border-radius:18px;padding:24px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.2)}.modal-icon{font-size:38px;margin-bottom:8px}.modal-message{font-size:18px;font-weight:900;margin-bottom:17px}.modal-ok{width:100%;padding:12px;border:0;border-radius:11px;background:#222;color:#fff;font-weight:800}.hidden{display:none!important}
+.manage-note{font-size:12px;color:#777;line-height:1.5}
+@media(min-width:601px){
+  .app{padding:18px 14px 50px}
+  .edit-top{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px;align-items:start;min-height:0}
+  .edit-photo-wrap{position:static;width:auto;margin:0}
+  .edit-photo,.edit-photo-placeholder{width:220px;height:220px}
+}
+@media(max-width:600px){
+  .category-manage-grid{grid-template-columns:1fr}
+  .admin-actions{grid-template-columns:1fr 1fr}
+  .edit-top{display:flex;flex-direction:column;gap:0}
+  .edit-photo-wrap{order:-1}
+}
+</style>
+</head>
+<body>
+<div id="messageModal" class="modal-backdrop hidden">
+  <div class="modal-box">
+    <div id="modalIcon" class="modal-icon">✅</div>
+    <div id="modalMessage" class="modal-message"></div>
+    <button class="modal-ok" onclick="closeMessageModal()">확인</button>
+  </div>
+</div>
+
+<div class="app">
+  <div class="top">
+    <h1 class="title">🏪 수입나라</h1>
+    <div class="desc">상품을 눌러 바로 수정할 수 있어요.</div>
+    <div id="connection" class="connection">☁️ 온라인 DB 연결 중...</div>
+  </div>
+
+  <div class="tabs">
+    <button id="findTab" class="tab active" onclick="go('find')">🔎 상품 찾기</button>
+    <button id="manageTab" class="tab" onclick="go('manage')">⚙️ 상품 관리</button>
+  </div>
+
+  <section id="findPage">
+    <div class="panel">
+      <div class="search"><input id="search" placeholder="상품명이나 종류를 검색하세요"><button id="searchBtn" type="button">검색</button></div>
+      <div class="section-label">📂 분류 <span class="muted">여러 개 선택 가능</span></div>
+      <div id="categoryFilter" class="scroll"></div>
+      <div class="section-label">🎨 색상 <span class="muted">여러 개 선택 가능</span></div>
+      <div id="colorFilter" class="color-filter"></div>
+      <div id="filterSummary" class="filter-summary"></div>
+    </div>
+    <div id="productGrid" class="grid"></div>
+  </section>
+
+  <section id="managePage" class="hidden">
+    <div id="manageHome" class="panel">
+      <div class="form-title">⚙️ 상품 관리</div>
+      <div class="manage-note">로그인 없이 바로 상품을 추가·수정할 수 있어요. 이 사이트에 접속한 사람은 관리 기능도 사용할 수 있습니다.</div>
+      <div class="admin-actions" style="margin-top:11px">
+        <button class="action" onclick="openForm(-1)">➕ 상품 추가</button>
+        <button class="action" onclick="openEditList()">✏️ 상품 수정</button>
+        <button class="action" onclick="openCategoryManager()">📂 분류 관리</button>
+        <button class="action" onclick="openColorManager()">🎨 색상 관리</button>
+      </div>
+      <div class="form-buttons"><button onclick="go('find')">🔎 상품 찾기로</button></div>
+    </div>
+
+    <div id="formPanel" class="panel hidden">
+      <div id="formTitle" class="form-title">➕ 상품 추가</div>
+      <div class="edit-top">
+        <div>
+          <div class="row"><label>상품명</label><input id="fName" placeholder="예: 망사 수세미 2P"></div>
+          <div class="row"><label>대분류</label><select id="fMajor"></select></div>
+          <div class="row"><label>소분류</label><select id="fMinor"></select></div>
+        </div>
+        <div class="edit-photo-wrap">
+          <div id="editPhotoBox" class="edit-photo-placeholder">📷<br>상품 사진</div><div id="photoStatus" style="font-size:11px;color:#777;text-align:center;margin-top:6px">사진을 선택하면 온라인에 저장됩니다.</div>
+          <label class="photo-input-label" for="fPhoto">사진 선택</label>
+          <input id="fPhoto" type="file" accept="image/*">
+        </div>
+      </div>
+
+      <div class="row">
+        <label>상품 색상 <span class="muted">동그라미를 눌러 선택하세요</span></label>
+        <div id="swatches" class="color-pick"></div><div id="selectedTags" class="selected-tags"></div>
+      </div>
+      <div class="row"><label>가격</label><input id="fPrice" type="number" min="0" placeholder="예: 1500"></div>
+      <div class="form-buttons"><button id="saveButton" class="primary" type="button">💾 저장</button><button onclick="closeForm()">취소</button></div>
+    </div>
+
+    <div id="editPanel" class="panel hidden">
+      <div class="form-title">✏️ 상품 수정</div>
+      <div class="search" style="margin-bottom:12px"><input id="editSearch" placeholder="수정할 상품 검색"><button id="editSearchBtn" type="button">검색</button></div>
+      <div id="editList" class="edit-list"></div>
+      <div class="form-buttons"><button onclick="backToManageHome()">← 관리 메뉴로</button></div>
+    </div>
+
+    <div id="categoryPanel" class="panel hidden">
+      <div class="form-title">📂 분류 관리</div><div class="manage-note">대분류와 소분류를 직접 추가·이름변경·삭제할 수 있어요.</div>
+      <div class="category-manage-grid" style="margin-top:12px">
+        <div class="category-box"><div class="section-label">📁 대분류</div><div id="majorManageList" class="category-list"></div><div class="form-buttons"><button class="primary" onclick="addMajorCategory()">➕ 대분류 추가</button></div></div>
+        <div class="category-box"><div class="section-label">📂 소분류 <span id="selectedMajorLabel" class="muted"></span></div><div id="minorManageList" class="category-list"></div><div class="form-buttons"><button class="primary" onclick="addMinorCategory()">➕ 소분류 추가</button></div></div>
+      </div>
+      <div class="form-buttons"><button onclick="backToManageHome()">← 관리 메뉴로</button></div>
+    </div>
+
+    <div id="colorPanel" class="panel hidden">
+      <div class="form-title">🎨 색상 관리</div><div class="manage-note">색상 이름과 실제 색상을 직접 추가·수정·삭제할 수 있어요.</div>
+      <div style="display:grid;grid-template-columns:1fr 90px;gap:8px;margin-top:12px">
+        <div class="row"><label>색상 이름</label><input id="newColorName" placeholder="예: 민트색"></div>
+        <div class="row"><label>색상</label><input id="newColorHex" type="color" value="#70D6C5"></div>
+      </div>
+      <div class="form-buttons"><button class="primary" onclick="addColorOption()">➕ 색상 추가</button></div>
+      <div class="section-label">현재 색상</div><div id="colorManageList" class="edit-list"></div>
+      <div class="form-buttons"><button onclick="loadColors()">🔄 색상 다시 불러오기</button><button onclick="backToManageHome()">← 관리 메뉴로</button></div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://nmdwdthqzqweyrltiack.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_-926l4OmRUNw9sHcfAvwmg_j3zyFJ--";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+
+const FALLBACK_COLORS=[
+  {id:1,name:"노란색",hex:"#FFD92F"},
+  {id:2,name:"핑크색",hex:"#F5A7C7"},
+  {id:3,name:"초록색",hex:"#59B957"},
+  {id:4,name:"파란색",hex:"#4F9FE8"},
+  {id:5,name:"빨간색",hex:"#E84C4C"},
+  {id:6,name:"주황색",hex:"#F39A3D"},
+  {id:7,name:"보라색",hex:"#9B78D1"},
+  {id:8,name:"흰색",hex:"#FFFFFF"},
+  {id:9,name:"검정색",hex:"#222222"},
+  {id:10,name:"회색",hex:"#9A9A9A"},
+  {id:11,name:"갈색",hex:"#98633F"}
+];
+
+let categories=[],colors=FALLBACK_COLORS.map(c=>({...c})),products=[];
+let selectedCategories=new Set(),selectedColorFilters=new Set();
+let selectedMajorForManage=null,editIndex=-1;
+let currentPhotoUrl="",currentPhotoFile=null;
+
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function msg(icon,message){$("modalIcon").textContent=icon;$("modalMessage").textContent=message;$("messageModal").classList.remove("hidden")}
+function closeMessageModal(){ $("messageModal").classList.add("hidden") }
+function status(ok,text){$("connection").textContent=text;$("connection").classList.toggle("bad",!ok)}
+
+async function init(){
+  try{
+    await loadCategories();
+  }catch(e){
+    console.error("분류 불러오기 실패:",e);
+    status(false,"⚠️ 분류 DB 연결을 확인해주세요.");
+  }
+  try{
+    await loadColors();
+  }catch(e){
+    console.error("색상 불러오기 실패:",e);
+    colors=FALLBACK_COLORS.map(c=>({...c}));
+    renderColorFilter();renderSwatches();renderColorManager();
+  }
+  try{
+    await loadProducts();
+    status(true,"☁️ 온라인 DB 연결됨");
+  }catch(e){
+    console.error("상품 불러오기 실패:",e);
+    status(false,"⚠️ 상품 DB 연결을 확인해주세요.");
+    alert("온라인 DB 연결에 실패했습니다.\n"+e.message);
+  }
+}
+
+async function loadCategories(){
+  const {data,error}=await db.from("shop_categories").select("id,name,parent_id,sort_order").order("sort_order").order("id");
+  if(error)throw error;
+  categories=data||[];
+  renderCategoryFilter();
+  populateMajor();
+  renderCategoryManager();
+}
+
+async function loadColors(){
+  const {data,error}=await db.from("shop_colors").select("id,name,hex").order("id");
+  if(error){
+    console.warn("색상 DB 불러오기 실패:",error);
+    colors=FALLBACK_COLORS.map(c=>({...c}));
+    renderColorFilter();renderSwatches();renderColorManager();
+    return;
+  }
+  colors=(data&&data.length?data:FALLBACK_COLORS).map(c=>({...c}));
+  renderColorFilter();renderSwatches();renderColorManager();
+}
+
+async function loadProducts(){
+  const {data,error}=await db.from("shop_products").select(`
+    id,name,category_id,price,photo_url,aliases,created_at,updated_at,
+    colorLinks:shop_product_colors(color_id,shop_colors(id,name,hex))
+  `).order("name");
+  if(error)throw error;
+  products=(data||[]).map(p=>({...p,colors:(p.colorLinks||[]).map(x=>x.color_id).filter(Boolean)}));
+  renderProducts();renderEditList();
+}
+function majorCategories(){return categories.filter(c=>c.parent_id===null)}
+function subcategories(majorId){return categories.filter(c=>c.parent_id===majorId)}
+function categoryName(id){return categories.find(c=>c.id===id)?.name||""}
+function categoryPath(product){
+  const cat=categories.find(c=>c.id===product.category_id);if(!cat)return {major:"",minor:""};
+  const parent=cat.parent_id===null?cat:categories.find(c=>c.id===cat.parent_id);
+  return {major:parent?.name||"",minor:cat.parent_id===null?"":cat.name};
+}
+function colorInfo(id){return colors.find(c=>c.id===id)||{id,name:String(id),hex:"#ddd"}}
+
+function renderCategoryFilter(){
+  const list=majorCategories();
+  $("categoryFilter").innerHTML=`<button class="pill ${selectedCategories.size===0?"active":""}" onclick="toggleCategory('all')">전체</button>`+
+    list.map(c=>`<button class="pill ${selectedCategories.has(c.id)?"active":""}" onclick="toggleCategory(${c.id})">${esc(c.name)}</button>`).join("");
+}
+function toggleCategory(id){
+  if(id==="all")selectedCategories.clear();
+  else selectedCategories.has(id)?selectedCategories.delete(id):selectedCategories.add(id);
+  renderCategoryFilter();renderProducts();
+}
+function renderColorFilter(){
+  $("colorFilter").innerHTML=`<button class="pill ${selectedColorFilters.size===0?"active":""}" onclick="toggleColorFilter('all')">전체</button>`+
+    colors.map(c=>`<button class="color-btn ${selectedColorFilters.has(c.id)?"active":""}" onclick="toggleColorFilter(${c.id})"><div class="dot" style="background:${c.hex}"></div>${esc(c.name)}</button>`).join("");
+}
+function toggleColorFilter(id){
+  if(id==="all")selectedColorFilters.clear();
+  else selectedColorFilters.has(id)?selectedColorFilters.delete(id):selectedColorFilters.add(id);
+  renderColorFilter();renderProducts();
+}
+function matches(p,q){
+  const path=categoryPath(p);
+  const catOk=selectedCategories.size===0||[...selectedCategories].some(id=>{
+    const major=categories.find(c=>c.id===id);return major&&(p.category_id===major.id||categories.find(c=>c.id===p.category_id)?.parent_id===major.id)
+  });
+  const colorOk=selectedColorFilters.size===0||[...selectedColorFilters].some(c=>(p.colors||[]).includes(c));
+  const text=(p.name+" "+path.major+" "+path.minor+" "+(p.aliases||[]).join(" ")).toLowerCase();
+  return catOk&&colorOk&&(!q||text.includes(q));
+}
+function renderFilterSummary(){
+  const cats=[...selectedCategories].map(categoryName),cols=[...selectedColorFilters].map(id=>colorInfo(id).name);
+  $("filterSummary").textContent=(cats.length||cols.length)?"선택됨: "+(cats.length?"📂 "+cats.join(", "):"")+(cats.length&&cols.length?"  +  ":"")+(cols.length?"🎨 "+cols.join(", "):""):"전체 상품이 표시됩니다.";
+}
+function renderProducts(){
+  const q=$("search").value.trim().toLowerCase(),list=products.filter(p=>matches(p,q));
+  $("productGrid").innerHTML=list.length?list.map(p=>{
+    const path=categoryPath(p),cs=(p.colors||[]).map(id=>colorInfo(id).name).join(" · ");
+    return `<div class="card" onclick="openEditFromFind(${p.id})">
+      ${p.photo_url?`<img class="photo" src="${esc(p.photo_url)}" alt="">`:`<div class="icon">📦</div>`}
+      <div class="product-body"><div class="meta">${esc(path.major)}${path.minor?" · "+esc(path.minor):""}</div>
+      <div class="name">${esc(p.name)}</div><div class="meta">🎨 ${esc(cs||"색상 정보 없음")}</div>
+      <div class="price">${Number(p.price||0).toLocaleString()}원</div></div>
+    </div>`;
+  }).join(""):`<div class="empty">🔎 찾는 상품이 없어요.</div>`;
+  renderFilterSummary();
+}
+function populateMajor(selectedId=""){
+  $("fMajor").innerHTML=majorCategories().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  if(selectedId)$("fMajor").value=selectedId;
+  updateMinorSelect();
+}
+function updateMinorSelect(selectedId=""){
+  const majorId=Number($("fMajor").value),subs=subcategories(majorId);
+  $("fMinor").innerHTML=subs.length?'<option value="">소분류를 선택하세요</option>'+subs.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(""):'<option value="">소분류 없음</option>';
+  if(selectedId)$("fMinor").value=selectedId;
+}
+$("fMajor").addEventListener("change",()=>updateMinorSelect());
+
+function selectedFormColors(){return $("fColors").value?$("fColors").value.split("|").filter(Boolean).map(Number):[]}
+function setFormColors(arr){$("fColors").value=[...new Set(arr)].join("|");renderSwatches()}
+function renderSwatches(){
+  $("swatches").innerHTML=colors.map(c=>`<button type="button" class="swatch ${selectedFormColors().includes(c.id)?"selected":""}" title="${esc(c.name)}" style="background:${c.hex}" onclick="toggleFormColor(${c.id});event.stopPropagation()"></button>`).join("");
+  $("selectedTags").innerHTML=selectedFormColors().map(id=>`<span class="tag">🎨 ${esc(colorInfo(id).name)}</span>`).join("");
+}
+function toggleFormColor(id){const a=selectedFormColors();a.includes(id)?setFormColors(a.filter(x=>x!==id)):setFormColors([...a,id])}
+
+function resetForm(){
+  editIndex=-1;currentPhotoUrl="";currentPhotoFile=null;$("fName").value="";$("fPrice").value="";$("fPhoto").value="";setFormColors([]);
+  if(majorCategories()[0])populateMajor(majorCategories()[0].id);
+  $("editPhotoBox").innerHTML="📷<br>상품 사진";$("photoStatus").textContent="사진을 선택하면 온라인에 저장됩니다.";
+}
+function openForm(index){
+  $("manageHome").classList.add("hidden");$("editPanel").classList.add("hidden");$("categoryPanel").classList.add("hidden");$("colorPanel").classList.add("hidden");$("formPanel").classList.remove("hidden");
+  if(index<0){$("formTitle").textContent="➕ 상품 추가";resetForm();return}
+  const p=products[index],path=categoryPath(p),parent=categories.find(c=>c.name===path.major&&c.parent_id===null);
+  editIndex=index;currentPhotoUrl=p.photo_url||"";currentPhotoFile=null;$("formTitle").textContent="✏️ 상품 수정";
+  populateMajor(parent?.id||majorCategories()[0]?.id);updateMinorSelect(p.category_id);$("fName").value=p.name||"";$("fPrice").value=p.price??"";setFormColors(p.colors||[]);
+  $("editPhotoBox").innerHTML=currentPhotoUrl?`<img class="edit-photo" src="${esc(currentPhotoUrl)}" alt="상품 사진">`:"📷<br>상품 사진";$("photoStatus").textContent=currentPhotoUrl?"☁️ 현재 사진은 온라인에 저장되어 있습니다.":"사진을 선택하면 온라인 저장됩니다.";
+}
+function openEditFromFind(id){const i=products.findIndex(p=>p.id===id);if(i<0)return;go("manage");openForm(i)}
+function closeForm(){msg("↩️","취소되었습니다.");resetForm();backToManageHome()}
+async function uploadPhoto(productId){
+  if(!currentPhotoFile)return currentPhotoUrl||null;
+  const ext=(currentPhotoFile.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+  const path=`${productId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const {error}=await db.storage.from("shop-images").upload(path,currentPhotoFile,{contentType:currentPhotoFile.type||"image/jpeg",upsert:false});
+  if(error)throw error;return db.storage.from("shop-images").getPublicUrl(path).data.publicUrl;
+}
+async function saveProduct(){
+  const name=$("fName").value.trim(),majorId=Number($("fMajor").value),minorId=Number($("fMinor").value),price=Number($("fPrice").value),colorIds=selectedFormColors();
+  if(!name||!majorId||!Number.isFinite(price)||price<0){alert("상품명, 대분류, 가격을 입력해주세요.");return}
+  const categoryId=minorId||majorId;
+  $("saveButton").disabled=true;
+  $("saveButton").textContent="⏳ 저장 중...";
+
+  try{
+    let productId,photoUploaded=false;
+
+    if(editIndex>=0){
+      productId=products[editIndex].id;
+      let photoUrl=products[editIndex].photo_url||null;
+
+      if(currentPhotoFile){
+        $("photoStatus").textContent="☁️ 사진 업로드 중...";
+        photoUrl=await uploadPhoto(productId);
+        photoUploaded=true;
+      }
+
+      let r=await db.from("shop_products").update({
+        name,category_id:categoryId,price,photo_url:photoUrl,updated_at:new Date().toISOString()
+      }).eq("id",productId);
+      if(r.error)throw r.error;
+
+      r=await db.from("shop_product_colors").delete().eq("product_id",productId);
+      if(r.error)throw r.error;
+
+    }else{
+      let r=await db.from("shop_products").insert({
+        name,category_id:categoryId,price,photo_url:null
+      }).select("id").single();
+      if(r.error)throw r.error;
+      productId=r.data.id;
+
+      if(currentPhotoFile){
+        $("photoStatus").textContent="☁️ 사진 업로드 중...";
+        const url=await uploadPhoto(productId);
+        photoUploaded=true;
+        r=await db.from("shop_products").update({photo_url:url}).eq("id",productId);
+        if(r.error)throw r.error;
+      }
+    }
+
+    if(colorIds.length){
+      const r=await db.from("shop_product_colors").insert(
+        colorIds.map(color_id=>({product_id:productId,color_id}))
+      );
+      if(r.error)throw r.error;
+    }
+
+    await loadProducts();
+    msg("✅","저장되었습니다.");
+    backToManageHome();
+    resetForm();
+  }catch(e){
+    console.error(e);
+    $("photoStatus").textContent="⚠️ 사진/상품 저장 실패";
+    alert("저장에 실패했습니다.\n"+e.message);
+  }finally{
+    $("saveButton").disabled=false;
+    $("saveButton").textContent="💾 저장";
+  }
+}
+
+$("saveButton").addEventListener("click",saveProduct);
+$("fPhoto").addEventListener("change",e=>{
+  currentPhotoFile=e.target.files[0]||null;
+  if(currentPhotoFile){
+    $("photoStatus").textContent="📷 사진 선택 완료 · 저장하면 온라인에 올라갑니다.";
+    const r=new FileReader();
+    r.onload=()=>{$("editPhotoBox").innerHTML=`<img class="edit-photo" src="${r.result}" alt="상품 사진">`};
+    r.readAsDataURL(currentPhotoFile);
+  }
+});
+
+function openEditList(){
+  backToManageSubpanels();
+  $("editPanel").classList.remove("hidden");
+  $("editSearch").value="";
+  renderEditList();
+  $("editSearch").focus();
+}
+
+function renderEditList(){
+  const q=($("editSearch")?.value||"").trim().toLowerCase(),list=products.filter(p=>{const path=categoryPath(p);return(p.name+" "+path.major+" "+path.minor).toLowerCase().includes(q)});
+  $("editList").innerHTML=list.length?list.map(p=>`<div class="edit-item" onclick="openForm(${products.findIndex(x=>x.id===p.id)})">${p.photo_url?`<img class="thumb" src="${esc(p.photo_url)}" alt="">`:`<div class="thumb" style="display:flex;align-items:center;justify-content:center">📦</div>`}<div class="info"><b>${esc(p.name)}</b><div class="small">${esc(categoryPath(p).major)}${categoryPath(p).minor?" · "+esc(categoryPath(p).minor):""} · ${Number(p.price||0).toLocaleString()}원</div></div><button onclick="event.stopPropagation();openForm(${products.findIndex(x=>x.id===p.id)})">수정</button><button class="danger" onclick="event.stopPropagation();deleteProduct(${p.id})">삭제</button></div>`).join(""):`<div class="empty">상품이 없어요.</div>`;
+}
+async function deleteProduct(id){const p=products.find(x=>x.id===id);if(!p||!confirm(`"${p.name}" 상품을 삭제할까요?`))return;const r=await db.from("shop_products").delete().eq("id",id);if(r.error){alert("삭제에 실패했습니다.\\n"+r.error.message);return}await loadProducts();msg("🗑️","삭제되었습니다.")}
+
+function renderCategoryManager(){
+  const majors=majorCategories();if(!selectedMajorForManage||!majors.some(c=>c.id===selectedMajorForManage))selectedMajorForManage=majors[0]?.id||null;
+  $("majorManageList").innerHTML=majors.length?majors.map(c=>`<div class="category-row ${c.id===selectedMajorForManage?"selected":""}" onclick="selectedMajorForManage=${c.id};renderCategoryManager()"><span>📁 ${esc(c.name)}</span><span class="small">${subcategories(c.id).length}개</span><div class="category-mini-actions"><button onclick="event.stopPropagation();renameMajorCategory(${c.id})">✏️</button><button class="danger" onclick="event.stopPropagation();deleteMajorCategory(${c.id})">삭제</button></div></div>`).join(""):`<div class="category-empty">대분류가 없습니다.</div>`;
+  const major=majors.find(c=>c.id===selectedMajorForManage),subs=major?subcategories(major.id):[];$("selectedMajorLabel").textContent=major?`· ${major.name}`:"";
+  $("minorManageList").innerHTML=subs.length?subs.map(s=>`<div class="category-row"><span>📂 ${esc(s.name)}</span><div class="category-mini-actions"><button onclick="renameMinorCategory(${s.id})">✏️</button><button class="danger" onclick="deleteMinorCategory(${s.id})">삭제</button></div></div>`).join(""):`<div class="category-empty">소분류가 없습니다.</div>`;
+}
+function openCategoryManager(){backToManageSubpanels();$("categoryPanel").classList.remove("hidden");renderCategoryManager()}
+function backToManageSubpanels(){ $("formPanel").classList.add("hidden");$("editPanel").classList.add("hidden");$("categoryPanel").classList.add("hidden");$("colorPanel").classList.add("hidden") }
+async function addMajorCategory(){const name=(prompt("새 대분류 이름을 입력하세요.")||"").trim();if(!name)return;if(majorCategories().some(c=>c.name===name)){alert("이미 있는 대분류입니다.");return}const r=await db.from("shop_categories").insert({name,parent_id:null,sort_order:0});if(r.error){alert("추가에 실패했습니다.\\n"+r.error.message);return}await loadCategories();msg("✅","저장되었습니다.")}
+async function renameMajorCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;const name=(prompt("새 대분류 이름을 입력하세요.",c.name)||"").trim();if(!name||name===c.name)return;const r=await db.from("shop_categories").update({name}).eq("id",id);if(r.error){alert("수정에 실패했습니다.\\n"+r.error.message);return}await loadCategories();await loadProducts();msg("✅","저장되었습니다.")}
+async function deleteMajorCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;if(products.some(p=>categoryPath(p).major===c.name)){alert("현재 이 분류를 사용하는 상품이 있어요. 상품 분류를 먼저 바꿔주세요.");return}if(!confirm(`"${c.name}" 대분류를 삭제할까요?`))return;const r=await db.from("shop_categories").delete().eq("id",id);if(r.error){alert("삭제에 실패했습니다.\\n"+r.error.message);return}await loadCategories();msg("🗑️","삭제되었습니다.")}
+async function addMinorCategory(){const major=categories.find(c=>c.id===selectedMajorForManage);if(!major){alert("먼저 대분류를 선택해주세요.");return}const name=(prompt(`"${major.name}"의 새 소분류 이름을 입력하세요.`)||"").trim();if(!name)return;if(subcategories(major.id).some(c=>c.name===name)){alert("이미 있는 소분류입니다.");return}const r=await db.from("shop_categories").insert({name,parent_id:major.id,sort_order:0});if(r.error){alert("추가에 실패했습니다.\\n"+r.error.message);return}await loadCategories();renderCategoryManager();msg("✅","저장되었습니다.")}
+async function renameMinorCategory(id){const c=categories.find(x=>x.id===id);if(!c)return;const name=(prompt("새 소분류 이름을 입력하세요.",c.name)||"").trim();if(!name||name===c.name)return;const r=await db.from("shop_categories").update({name}).eq("id",id);if(r.error){alert("수정에 실패했습니다.\\n"+r.error.message);return}await loadCategories();await loadProducts();renderCategoryManager();msg("✅","저장되었습니다.")}
+async function deleteMinorCategory(id){if(products.some(p=>p.category_id===id)){alert("현재 이 소분류를 사용하는 상품이 있어요. 상품 분류를 먼저 바꿔주세요.");return}const c=categories.find(x=>x.id===id);if(!c||!confirm(`"${c.name}" 소분류를 삭제할까요?`))return;const r=await db.from("shop_categories").delete().eq("id",id);if(r.error){alert("삭제에 실패했습니다.\\n"+r.error.message);return}await loadCategories();msg("🗑️","삭제되었습니다.")}
+
+function renderColorManager(){$("colorManageList").innerHTML=colors.length?colors.map(c=>`<div class="color-manage-row"><div class="color-manage-dot" style="background:${c.hex}"></div><div class="info"><b>${esc(c.name)}</b><div class="small">${products.filter(p=>(p.colors||[]).includes(c.id)).length?`상품에서 사용 중`:"사용 중인 상품 없음"}</div></div><button onclick="renameColorOption(${c.id})">✏️</button><button class="danger" onclick="deleteColorOption(${c.id})">삭제</button></div>`).join(""):`<div class="empty">등록된 색상이 없습니다.</div>`}
+function openColorManager(){backToManageSubpanels();$("colorPanel").classList.remove("hidden");renderColorManager()}
+async function addColorOption(){const name=$("newColorName").value.trim(),hex=$("newColorHex").value;if(!name){alert("색상 이름을 입력해주세요.");return}if(colors.some(c=>c.name===name)){alert("이미 있는 색상 이름입니다.");return}const r=await db.from("shop_colors").insert({name,hex});if(r.error){alert("추가에 실패했습니다.\\n"+r.error.message);return}$("newColorName").value="";await loadColors();msg("✅","저장되었습니다.")}
+async function renameColorOption(id){const c=colors.find(x=>x.id===id);if(!c)return;const name=(prompt("새 색상 이름을 입력하세요.",c.name)||"").trim();if(!name||name===c.name)return;const r=await db.from("shop_colors").update({name}).eq("id",id);if(r.error){alert("수정에 실패했습니다.\\n"+r.error.message);return}await loadColors();await loadProducts();msg("✅","저장되었습니다.")}
+async function deleteColorOption(id){const c=colors.find(x=>x.id===id);if(!c)return;if(products.some(p=>(p.colors||[]).includes(id))){alert("현재 상품에서 사용 중인 색상입니다. 상품에서 먼저 색상을 제거해주세요.");return}if(!confirm(`"${c.name}" 색상을 삭제할까요?`))return;const r=await db.from("shop_colors").delete().eq("id",id);if(r.error){alert("삭제에 실패했습니다.\\n"+r.error.message);return}await loadColors();msg("🗑️","삭제되었습니다.")}
+
+function backToManageHome(){backToManageSubpanels();$("manageHome").classList.remove("hidden")}
+function go(page){const find=page==="find";$("findPage").classList.toggle("hidden",!find);$("managePage").classList.toggle("hidden",find);$("findTab").classList.toggle("active",find);$("manageTab").classList.toggle("active",!find);if(find)renderProducts();else backToManageHome()}
+$("searchBtn").addEventListener("click",renderProducts);$("search").addEventListener("keydown",e=>{if(e.key==="Enter")renderProducts()});$("editSearchBtn").addEventListener("click",renderEditList);$("editSearch").addEventListener("input",renderEditList);
+const hidden=document.createElement("input");hidden.type="hidden";hidden.id="fColors";$("formPanel").appendChild(hidden);
+init();
+</script>
+</body>
+</html>
